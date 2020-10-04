@@ -1,0 +1,19 @@
+{
+  "db": {
+    "marketPrice": {
+      "insert": {
+        "typeId": 32772,
+        "averagePrice": 1262004.63,
+        "adjustedPrice": 1027182.34,
+        "timeStamp": new
+        Date(2020,
+        9,
+        15,
+        14,
+        55,
+        56,
+        500)
+      }
+    }
+  }
+}

@@ -16,9 +16,9 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import java.math.BigDecimal
 
-@RestClientTest(MarketApiService::class)
+@RestClientTest(MarketPriceEsiService::class)
 @EnableConfigurationProperties(EsiConfigurationProperties::class)
-internal class MarketApiServiceTest {
+internal class MarketPriceEsiServiceTest {
 
     val successResponseJsonString = "[\n" +
             "    {\n" +
@@ -47,10 +47,10 @@ internal class MarketApiServiceTest {
             "        \"type_id\": 32783\n" +
             "    }]"
 
-    val successResponseObj = MarketPrice(32772, BigDecimal("1262004.63"),BigDecimal("1027182.34"))
+    val successResponseObj = EsiMarketPrice(32772, BigDecimal("1262004.63"),BigDecimal("1027182.34"))
 
     @Autowired
-    lateinit var marketApiService: MarketApiService
+    lateinit var marketPriceEsiService: MarketPriceEsiService
 
     @Test
     fun contextLoads() {}
@@ -59,7 +59,7 @@ internal class MarketApiServiceTest {
     fun objectMapper() {
         val mapper = jacksonObjectMapper()
         mapper.propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
-        val readValue = mapper.readValue(successResponseJsonString, Array<MarketPrice>::class.java)
+        val readValue = mapper.readValue(successResponseJsonString, Array<EsiMarketPrice>::class.java)
         val first = readValue[0]
     }
 
@@ -68,12 +68,12 @@ internal class MarketApiServiceTest {
         val httpHeaders = HttpHeaders()
         httpHeaders.set(HttpHeaders.ETAG,"\"5ce82dd98572baf626dcf1a09405339724796d8d9e2dcaea938b1d64\"")
         httpHeaders.set(HttpHeaders.EXPIRES,"Wed, 30 Sep 2020 01:54:55 GMT")
-        val mockRestServiceServer  = MockRestServiceServer.createServer(marketApiService.restTemplate)
+        val mockRestServiceServer  = MockRestServiceServer.createServer(marketPriceEsiService.restTemplate)
         mockRestServiceServer
                 .expect(requestTo("/v1/markets/prices"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(successResponseJsonString, MediaType.APPLICATION_JSON).headers(httpHeaders))
-        val actualPrices = marketApiService.getMarketPrices()
+        val actualPrices = marketPriceEsiService.getMarketPrices()
         assertThat(actualPrices[0]).isEqualTo(successResponseObj)
     }
 }

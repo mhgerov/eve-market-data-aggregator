@@ -10,7 +10,7 @@ import java.net.URI
 import java.time.Instant
 
 @Service
-class MarketApiService(esiConfigurationProperties: EsiConfigurationProperties, restTemplateBuilder: RestTemplateBuilder) {
+class MarketPriceEsiService(esiConfigurationProperties: EsiConfigurationProperties, restTemplateBuilder: RestTemplateBuilder) {
 
     val marketPricesPath: URI = URI.create("/v1/markets/prices")
     final val restTemplate: RestTemplate
@@ -35,8 +35,8 @@ class MarketApiService(esiConfigurationProperties: EsiConfigurationProperties, r
     lateinit var etag: String
     lateinit var expires: Instant
 
-    fun getMarketPrices(): List<MarketPrice> {
-        val response = restTemplate.getForEntity(marketPricesPath, Array<MarketPrice>::class.java)
+    fun getMarketPrices(): List<EsiMarketPrice> {
+        val response = restTemplate.getForEntity(marketPricesPath, Array<EsiMarketPrice>::class.java)
         etag = response.headers.eTag!!
         expires = Instant.ofEpochMilli(response.headers.expires)
         return response.body!!.toList()
