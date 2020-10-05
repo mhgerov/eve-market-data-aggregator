@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.time.Instant
 
 data class MarketPrice (
-        val id: String,
+        val id: String?,
         val typeId: Int,
         val averagePrice: BigDecimal,
         val adjustedPrice: BigDecimal,
