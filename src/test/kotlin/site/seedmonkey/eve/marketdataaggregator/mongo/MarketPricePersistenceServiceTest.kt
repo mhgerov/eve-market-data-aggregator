@@ -1,24 +1,20 @@
 package site.seedmonkey.eve.marketdataaggregator.mongo
 
+import com.mongodb.internal.connection.tlschannel.util.Util.assertTrue
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.MongoTemplate
-import site.seedmonkey.eve.marketdataaggregator.scheduling.TimeConfiguration
 import site.seedmonkey.eve.marketdataaggregator.web.EsiMarketPrice
 import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.function.Consumer
 
 val timeNow: Instant = Instant.parse("2016-05-18T16:00:00.23Z")
 
@@ -30,7 +26,7 @@ internal class MarketPricePersistenceServiceTest {
     class TestConfig {
 
         @Bean
-        fun clock(): Clock = Clock.fixed(timeNow,ZoneId.of("UTC"))
+        fun clock(): Clock = Clock.fixed(timeNow, ZoneId.of("UTC"))
 
     }
 
@@ -65,16 +61,21 @@ internal class MarketPricePersistenceServiceTest {
 
     @Test
     fun saveAll() {
-        val input = setOf<EsiMarketPrice>(
+        val input = setOf(
                 EsiMarketPrice(27319, BigDecimal("11.64"), BigDecimal("10.07")),
                 EsiMarketPrice(54559, BigDecimal("19683846.15"), BigDecimal("0")),
                 EsiMarketPrice(32853, BigDecimal("130486190.48"), BigDecimal("140751035.8"))
         )
-        val expected = setOf<MarketPrice>(
+        val expected = setOf(
                 MarketPrice(null, 27319, BigDecimal("11.64"), BigDecimal("10.07"), timeNow),
                 MarketPrice(null, 54559, BigDecimal("19683846.15"), BigDecimal("0"), timeNow),
                 MarketPrice(null, 32853, BigDecimal("130486190.48"), BigDecimal("140751035.8"), timeNow)
         )
-        assertThat(Instant.now(marketPricePersistenceService.clock)).isEqualTo(timeNow)
+        marketPricePersistenceService.saveAll(input)
+        val findAll = HashSet(mongoTemplate.findAll(MarketPrice::class.java))
+        assertThat(findAll.size).isEqualTo(3)
+        findAll.forEach(Consumer { p ->
+            findAll.contains(p.copy(id=null))
+        })
     }
 }
