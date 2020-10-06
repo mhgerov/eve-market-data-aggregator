@@ -8,17 +8,31 @@ import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.MongoTemplate
+import site.seedmonkey.eve.marketdataaggregator.scheduling.TimeConfiguration
 import site.seedmonkey.eve.marketdataaggregator.web.EsiMarketPrice
 import java.math.BigDecimal
+import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
+val timeNow: Instant = Instant.parse("2016-05-18T16:00:00.23Z")
+
 @DataMongoTest
-@Import(MarketPricePersistenceService::class)
+@Import(MarketPricePersistenceServiceTest.TestConfig::class)
 internal class MarketPricePersistenceServiceTest {
+
+    @Import(MarketPricePersistenceService::class)
+    class TestConfig {
+
+        @Bean
+        fun clock(): Clock = Clock.fixed(timeNow,ZoneId.of("UTC"))
+
+    }
 
     @Autowired
     lateinit var marketPricePersistenceService: MarketPricePersistenceService
@@ -51,7 +65,6 @@ internal class MarketPricePersistenceServiceTest {
 
     @Test
     fun saveAll() {
-        val timeNow = Instant.parse("2016-05-18T16:00:00.23Z")
         val input = setOf<EsiMarketPrice>(
                 EsiMarketPrice(27319, BigDecimal("11.64"), BigDecimal("10.07")),
                 EsiMarketPrice(54559, BigDecimal("19683846.15"), BigDecimal("0")),
@@ -62,8 +75,6 @@ internal class MarketPricePersistenceServiceTest {
                 MarketPrice(null, 54559, BigDecimal("19683846.15"), BigDecimal("0"), timeNow),
                 MarketPrice(null, 32853, BigDecimal("130486190.48"), BigDecimal("140751035.8"), timeNow)
         )
-        mock(Instant::class.java)
-        `when`(Instant.now()).thenReturn(timeNow)
-        assertThat(Instant.now()).isEqualTo(timeNow)
+        assertThat(Instant.now(marketPricePersistenceService.clock)).isEqualTo(timeNow)
     }
 }
