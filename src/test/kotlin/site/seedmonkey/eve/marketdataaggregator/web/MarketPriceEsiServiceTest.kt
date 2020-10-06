@@ -74,6 +74,6 @@ internal class MarketPriceEsiServiceTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(successResponseJsonString, MediaType.APPLICATION_JSON).headers(httpHeaders))
         val actualPrices = marketPriceEsiService.getMarketPrices()
-        assertThat(actualPrices[0]).isEqualTo(successResponseObj)
+        assertThat(actualPrices.contains(successResponseObj)).isTrue()
     }
 }

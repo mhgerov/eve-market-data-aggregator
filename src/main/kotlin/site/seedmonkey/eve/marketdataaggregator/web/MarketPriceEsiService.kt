@@ -35,10 +35,10 @@ class MarketPriceEsiService(esiConfigurationProperties: EsiConfigurationProperti
     lateinit var etag: String
     lateinit var expires: Instant
 
-    fun getMarketPrices(): List<EsiMarketPrice> {
+    fun getMarketPrices(): Set<EsiMarketPrice> {
         val response = restTemplate.getForEntity(marketPricesPath, Array<EsiMarketPrice>::class.java)
         etag = response.headers.eTag!!
         expires = Instant.ofEpochMilli(response.headers.expires)
-        return response.body!!.toList()
+        return response.body!!.toSet()
     }
 }
