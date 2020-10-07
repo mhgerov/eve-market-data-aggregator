@@ -1,6 +1,5 @@
 package site.seedmonkey.eve.marketdataaggregator.mongo
 
-import com.mongodb.internal.connection.tlschannel.util.Util.assertTrue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
